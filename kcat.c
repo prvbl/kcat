@@ -420,6 +420,11 @@ static void producer_run (FILE *fp, char **paths, int pathcnt) {
 
                 inbuf_init(&inbuf, conf.msg_size, conf.delim, conf.delim_size);
 
+
+                /* Enforce -c -1 to not consume any messages */
+                if (conf.msg_cnt == -1)
+                        conf.run = 0;
+
                 /* Read messages from input, delimited by conf.delim */
                 while (conf.run &&
                        !(at_eof = !inbuf_read_to_delimeter(&inbuf, fp, &b))) {
@@ -880,6 +885,10 @@ static void kafkaconsumer_run (FILE *fp, char *const *topics, int topic_cnt) {
         KC_INFO(1, "Waiting for group rebalance\n");
 
         rd_kafka_topic_partition_list_destroy(topiclist);
+
+        /* Enforce -c -1 to not consume any messages */
+        if (conf.msg_cnt == -1)
+                conf.run = 0;
 
         /* Read messages from Kafka, write to 'fp'. */
         while (conf.run) {
